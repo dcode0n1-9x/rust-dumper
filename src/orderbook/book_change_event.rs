@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use pricelevel::Side;
+use std::sync::Arc;
 
 /// Event data for orderbook price level changes.
 /// It is assumed that the listener is aware of the
@@ -8,9 +8,9 @@ use pricelevel::Side;
 /// e.g. adding, cancelling, updating or matching order
 #[derive(Debug)]
 pub struct PriceLevelChangedEvent {
-    /// the order book side of the price level 
+    /// the order book side of the price level
     pub side: Side,
-    
+
     /// price level price
     pub price: u64,
 

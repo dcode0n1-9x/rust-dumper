@@ -1,9 +1,9 @@
 //! Contains the core matching engine logic for the order book.
 
-use super::book_change_event::PriceLevelChangedEvent;
-use super::pool::MatchingPool;
-use super::orderbook::{OrderBook};
-use super::error::OrderBookError;
+use super::OrderBook;
+use crate::orderbook::book_change_event::PriceLevelChangedEvent;
+use crate::orderbook::error::OrderBookError;
+use crate::orderbook::pool::MatchingPool;
 use pricelevel::{MatchResult, OrderId, Side};
 use std::sync::atomic::Ordering;
 

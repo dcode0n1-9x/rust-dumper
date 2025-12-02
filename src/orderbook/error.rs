@@ -1,20 +1,15 @@
 //! Order book error types
-
 use pricelevel::{PriceLevelError, Side};
 use std::fmt;
-
 /// Errors that can occur within the OrderBook
 #[derive(Debug)]
 pub enum OrderBookError {
     /// Error from underlying price level operations
     PriceLevelError(PriceLevelError),
-
     /// Order not found in the book
     OrderNotFound(String),
-
     /// Invalid price level
     InvalidPriceLevel(u64),
-
     /// Price crossing (bid >= ask)
     PriceCrossing {
         /// Price that would cause crossing
@@ -24,7 +19,6 @@ pub enum OrderBookError {
         /// Best opposite price
         opposite_price: u64,
     },
-
     /// Insufficient liquidity for market order
     InsufficientLiquidity {
         /// The side of the market order
@@ -34,25 +28,21 @@ pub enum OrderBookError {
         /// Quantity available
         available: u64,
     },
-
     /// Operation not permitted for specified order type
     InvalidOperation {
         /// Description of the error
         message: String,
     },
-
     /// Error while serializing snapshot data
     SerializationError {
         /// Underlying error message
         message: String,
     },
-
     /// Error while deserializing snapshot data
     DeserializationError {
         /// Underlying error message
         message: String,
     },
-
     /// Snapshot integrity check failed
     ChecksumMismatch {
         /// Expected checksum value
@@ -61,7 +51,6 @@ pub enum OrderBookError {
         actual: String,
     },
 }
-
 impl fmt::Display for OrderBookError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -106,9 +95,7 @@ impl fmt::Display for OrderBookError {
         }
     }
 }
-
 impl std::error::Error for OrderBookError {}
-
 impl From<PriceLevelError> for OrderBookError {
     fn from(err: PriceLevelError) -> Self {
         OrderBookError::PriceLevelError(err)

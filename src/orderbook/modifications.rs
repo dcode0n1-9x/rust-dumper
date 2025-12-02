@@ -1,7 +1,7 @@
-use super::book::OrderBook;
-use super::book_change_event::PriceLevelChangedEvent;
-use super::error::OrderBookError;
-use super::trade::TradeResult;
+use crate::orderbook::book::OrderBook;
+use crate::orderbook::book_change_event::PriceLevelChangedEvent;
+use crate::orderbook::error::OrderBookError;
+use crate::orderbook::trade::TradeResult;
 use pricelevel::{OrderId, OrderType, OrderUpdate, PriceLevel, Side};
 use std::sync::Arc;
 use tracing::trace;
@@ -578,7 +578,6 @@ where
 
             let price_level = price_levels.get_or_insert(price, Arc::new(PriceLevel::new(price)));
             let level = price_level.value();
-
 
             // Convert to unit type for PriceLevel compatibility
             let unit_order = self.convert_to_unit_type(&order);

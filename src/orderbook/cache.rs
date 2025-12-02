@@ -1,9 +1,3 @@
-/******************************************************************************
-   Author: Joaquín Béjar García
-   Email: jb@taunais.com
-   Date: 15/7/25
-******************************************************************************/
-
 use serde::Serialize;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
@@ -22,7 +16,7 @@ impl PriceLevelCache {
             cache_valid: AtomicBool::new(false),
         }
     }
-    
+
     pub fn invalidate(&self) {
         self.cache_valid.store(false, Ordering::Relaxed);
     }
