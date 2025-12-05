@@ -5,7 +5,11 @@ mod orderbook;
 mod utils;
 
 use crate::config::kafka::{KafkaConfig, create_consumer};
-use crate::helpers::{DeleteInstrument, EngineCommand, InstrumentCreateMessage, InstrumentPayload};
+use crate::helpers::types::{OrderDelete, OrderModify};
+use crate::helpers::{
+    DeleteInstrument, EngineCommand, InstrumentCreateMessage, InstrumentPayload, NewOrderMessage,
+    NewOrderPayload,
+};
 use futures::StreamExt;
 use rdkafka::message::Message;
 use tokio::sync::mpsc;
@@ -32,8 +36,9 @@ async fn main() {
         topics: vec![
             "instrument.create".to_string(),
             "instrument.delete".to_string(),
-            "order.create".to_string(),
             "alert.create".to_string(),
+            "order.create".to_string(),
+            "order.modify".to_string(),
         ],
     };
     let consumer = create_consumer(&kafka_config).expect("Failed to create Kafka consumer");
@@ -118,18 +123,65 @@ async fn main() {
                             "[INFO] Received message on topic 'order.created': {}",
                             payload
                         );
-                        // TODO: parse JSON/Protobuf here:
-                        // This is just an example assuming JSON:
-                        // { "symbol": "BTC/USD", "order_id": 123, "price": 50000, "quantity": 100, "side": "buy", "tif": "GTC" }
-
-                        // if let Ok(order) = parse_new_order(payload) {
-                        //     let cmd = EngineCommand::OrderCreate(order);
-                        //     if let Err(e) = tx.send(cmd).await {
-                        //         warn!("Failed to send OrderCreate to engine: {}", e);
-                        //     }
-                        // } else {
-                        //     warn!("Failed to parse order.created payload: {}", payload);
-                        // }
+                        match serde_json::from_str::<NewOrderMessage>(payload) {
+                            Ok(instr_msg) => {
+                                let cmd = EngineCommand::OrderCreate(NewOrderPayload {
+                                    orderId: instr_msg.order.orderId,
+                                    side: instr_msg.order.side,
+                                    timeInForce: instr_msg.order.timeInForce,
+                                    tradingSymbol: instr_msg.order.tradingSymbol,
+                                    userId: instr_msg.order.userId,
+                                    instrumentId: instr_msg.order.instrumentId,
+                                    exchange: instr_msg.order.exchange,
+                                    product: instr_msg.order.product,
+                                    variety: instr_msg.order.variety,
+                                    orderType: instr_msg.order.orderType,
+                                    transactionType: instr_msg.order.transactionType,
+                                    quantity: instr_msg.order.quantity,
+                                    price: instr_msg.order.price,
+                                });
+                                if let Err(e) = tx.send(cmd).await {
+                                    warn!("Failed to send InstrumentCreate to engine: {}", e);
+                                }
+                            }
+                            Err(e) => {
+                                warn!("Failed to parse instrument.create payload: {}", e);
+                            } // l
+                        }
+                    }
+                    "order.modify" => {
+                        info!(
+                            "[INFO] Received message on topic 'order.modify': {}",
+                            payload
+                        );
+                        match serde_json::from_str::<OrderModify>(payload) {
+                            Ok(modify_msg) => {
+                                let cmd = EngineCommand::OrderModify(modify_msg);
+                                if let Err(e) = tx.send(cmd).await {
+                                    warn!("Failed to send OrderModify to engine: {}", e);
+                                }
+                            }
+                            Err(e) => {
+                                warn!("Failed to parse order.modify payload: {}", e);
+                            }
+                        }
+                    }
+                    "order.delete" => {
+                        info!(
+                            "[INFO] Received message on topic 'order.delete': {}",
+                            payload
+                        );
+                        match serde_json::from_str::<OrderDelete>(payload) {
+                            Ok(delete_order) => {
+                                let cmd = EngineCommand::OrderDelete(delete_order);
+                                if let Err(e) = tx.send(cmd).await {
+                                    warn!("Failed to send OrderDelete to engine: {}", e);
+                                }
+                            }
+                            Err(e) => {
+                                warn!("Failed to parse order.delete payload: {}", e);
+                            }
+                        }
                     }
                     other => {
                         warn!("[WARN] Received message on unknown topic: {}", other);

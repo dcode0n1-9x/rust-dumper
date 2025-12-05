@@ -3,65 +3,20 @@ use pricelevel::TimeInForce;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
-pub struct DeleteInstrument {
-    pub instrumentToken: String,
-}
-#[derive(Debug, Deserialize)]
-pub struct NewOrder {
-    pub tradingSymbol: String,
-    pub orderId: u64,
-    pub price: i64,
-    pub quantity: u64,
-    pub side: Side,
-    pub timeInForce: TimeInForce,
-}
-
-// {
-//   id: "cmioqwl4c0001p0kes2jw7x8d",
-//   orderId: "aaasad602606",
-//   userId: "cmiomruj30002qwke536bg9ce",
-//   instrumentId: "cmiomrupd002sqwkese0111tc",
-//   parentOrderId: null,
-//   exchangeOrderId: null,
-//   exchangeTimestamp: null,
-//   placedBy: "H",
-//   variety: "REGULAR",
-//   orderType: "MARKET",
-//   transactionType: "BUY",
-//   validity: "DAY",
-//   product: "CNC",
-//   exchange: "NSE",
-//   tradingSymbol: "TATASTEEL",
-//   quantity: 5,
-//   disclosedQuantity: 0,
-//   price: 5,
-//   triggerPrice: 0,
-//   averagePrice: 0,
-//   filledQuantity: 0,
-//   pendingQuantity: 5,
-//   cancelledQuantity: 0,
-//   status: "PENDING",
-//   statusMessage: null,
-//   tag: null,
-//   clientOrderId: null,
-//   orderTimestamp: 2025-12-02T15:41:10.763Z,
-//   exchangeUpdateTime: null,
-//   rejectedBy: null,
-//   cancelledBy: null,
-//   createdAt: 2025-12-02T15:41:10.763Z,
-//   updatedAt: 2025-12-02T15:41:10.763Z,
-//   modificationCount: 0,
-// }
-
-#[derive(Debug, Deserialize)]
 pub enum EngineCommand {
     InstrumentCreate(InstrumentPayload),
     InstrumentDelete(DeleteInstrument),
-    OrderCreate(NewOrder),
+    OrderCreate(NewOrderPayload),
+    OrderDelete(OrderDelete),
+    OrderModify(OrderModify),
 }
 
 #[derive(Debug, Deserialize)]
+pub struct DeleteInstrument {
+    pub instrumentToken: String,
+}
 
+#[derive(Debug, Deserialize)]
 pub struct InstrumentPayload {
     pub id: String,
     pub instrumentToken: String,
@@ -86,4 +41,42 @@ pub struct InstrumentPayload {
 #[derive(Debug, Deserialize)]
 pub struct InstrumentCreateMessage {
     pub instrument: InstrumentPayload,
+}
+
+#[derive(Debug, Deserialize)]
+
+
+pub struct NewOrderMessage {
+    pub order: NewOrderPayload,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct NewOrderPayload {
+    pub orderId: u64,
+    pub userId: String,
+    pub instrumentId: String,
+    pub tradingSymbol: String,
+    pub exchange: String,
+    pub product: String,
+    pub variety: String,
+    pub orderType: String,
+    pub transactionType: String,
+    pub quantity: u64,
+    pub price: u64,
+    pub side: Side,
+    pub timeInForce: TimeInForce,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OrderDelete {
+    pub tradingSymbol: String,
+    pub orderId: u64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OrderModify {
+    pub tradingSymbol: String,
+    pub orderId: u64,
+    pub new_price: u64,
+    pub new_quantity: u64,
 }
