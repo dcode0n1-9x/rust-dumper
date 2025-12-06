@@ -4,20 +4,20 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub enum EngineCommand {
-    InstrumentCreate(InstrumentPayload),
-    InstrumentDelete(DeleteInstrument),
-    OrderCreate(NewOrderPayload),
-    OrderDelete(OrderDelete),
-    OrderModify(OrderModify),
+    InstrumentCreate(InstrumentCreatePayload),
+    InstrumentDelete(DeleteInstrumentPayload),
+    OrderCreate(OrderCreatePayload),
+    OrderCancel(OrderCancelPayload),
+    OrderModify(OrderModifyPayload),
 }
 
 #[derive(Debug, Deserialize)]
-pub struct DeleteInstrument {
+pub struct DeleteInstrumentPayload {
     pub instrumentToken: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct InstrumentPayload {
+pub struct InstrumentCreatePayload {
     pub id: String,
     pub instrumentToken: String,
     pub exchangeToken: String,
@@ -39,19 +39,7 @@ pub struct InstrumentPayload {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct InstrumentCreateMessage {
-    pub instrument: InstrumentPayload,
-}
-
-#[derive(Debug, Deserialize)]
-
-
-pub struct NewOrderMessage {
-    pub order: NewOrderPayload,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct NewOrderPayload {
+pub struct OrderCreatePayload {
     pub orderId: u64,
     pub userId: String,
     pub instrumentId: String,
@@ -66,15 +54,14 @@ pub struct NewOrderPayload {
     pub side: Side,
     pub timeInForce: TimeInForce,
 }
-
 #[derive(Debug, Deserialize)]
-pub struct OrderDelete {
-    pub tradingSymbol: String,
+pub struct OrderCancelPayload {
     pub orderId: u64,
+    pub tradingSymbol: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct OrderModify {
+pub struct OrderModifyPayload {
     pub tradingSymbol: String,
     pub orderId: u64,
     pub new_price: u64,

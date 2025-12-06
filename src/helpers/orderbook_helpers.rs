@@ -1,14 +1,10 @@
-use crate::helpers::NewOrderPayload;
-use crate::helpers::types::OrderDelete;
-use crate::helpers::types::OrderModify;
+use super::{OrderCancelPayload, OrderCreatePayload, OrderModifyPayload};
 use crate::orderbook::manager::BookManager;
 use crate::orderbook::manager::BookManagerStd;
 use pricelevel::{OrderId, OrderUpdate};
 use tracing::{info, warn};
 
-pub fn handle_order_create(manager: &mut BookManagerStd<()>, order: NewOrderPayload) {
-    println!("Handling new order for symbol: {}", order.tradingSymbol);
-    println!("Order details: {:?}", order);
+pub fn handle_order_create(manager: &mut BookManagerStd<()>, order: OrderCreatePayload) {
     let symbol = order.tradingSymbol;
     if manager.get_book(&symbol).is_none() {
         info!("No book for {}, creating one on demand", symbol);
@@ -31,24 +27,24 @@ pub fn handle_order_create(manager: &mut BookManagerStd<()>, order: NewOrderPayl
     }
 }
 
-pub fn handle_order_delete(manager: &mut BookManagerStd<()>, order: OrderDelete) {
+pub fn handle_order_cancel(manager: &mut BookManagerStd<()>, order: OrderCancelPayload) {
     let Some(book) = manager.get_book_mut(&order.tradingSymbol) else {
         warn!(
-            "No book found for {}, cannot delete order {}",
+            "No book found for {}, cannot cancel order {}",
             order.tradingSymbol, order.orderId
         );
         return;
     };
     let order_id = OrderId::from_u64(order.orderId);
     if let Err(e) = book.cancel_order(order_id) {
-        warn!("Failed to remove order {} on {}: {}", order_id, order.tradingSymbol, e);
+        warn!(
+            "Failed to remove order {} on {}: {}",
+            order_id, order.tradingSymbol, e
+        );
     }
 }
 
-pub fn handle_order_modify(
-    manager: &mut BookManagerStd<()>,
-    order : OrderModify
-) {
+pub fn handle_order_modify(manager: &mut BookManagerStd<()>, order: OrderModifyPayload) {
     let Some(book) = manager.get_book_mut(&order.tradingSymbol) else {
         warn!(
             "No book found for {}, cannot modify order {}",
@@ -63,6 +59,9 @@ pub fn handle_order_modify(
         new_quantity: order.new_quantity,
     };
     if let Err(e) = book.update_order(order_update) {
-        warn!("Failed to modify order {} on {}: {}", order_id, order.tradingSymbol, e);
+        warn!(
+            "Failed to modify order {} on {}: {}",
+            order_id, order.tradingSymbol, e
+        );
     }
 }
