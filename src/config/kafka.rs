@@ -24,3 +24,11 @@ pub fn create_consumer(config: &KafkaConfig) -> Result<StreamConsumer, KafkaErro
 
     Ok(consumer)
 }
+
+
+pub fn create_producer(config: &KafkaConfig) -> Result<rdkafka::producer::FutureProducer, KafkaError> {
+    let producer: rdkafka::producer::FutureProducer = ClientConfig::new()
+        .set("bootstrap.servers", &config.brokers)
+        .create()?;
+    Ok(producer)
+}

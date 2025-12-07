@@ -4,8 +4,8 @@ use crate::orderbook::manager::BookManagerStd;
 use tracing::{info, warn};
 
 pub fn handle_instrument_create(manager: &mut BookManagerStd<()>, instr: InstrumentCreatePayload) {
-    let token = instr.instrumentToken;
-    println!("Handling instrument create for symbol: {}", token);
+    let token = instr.instrument_id;
+    println!("Handling instrument create for id: {}", token);
     if manager.get_book(&token).is_some() {
         warn!("Instrument {} already exists, skipping", token);
         return;
@@ -18,7 +18,7 @@ pub fn handle_instrument_delete(
     manager: &mut BookManagerStd<()>,
     delete_instr: DeleteInstrumentPayload,
 ) {
-    let instrument_id = delete_instr.instrumentToken;
+    let instrument_id = delete_instr.instrument_id;
     if manager.get_book(&instrument_id).is_none() {
         warn!("Instrument {} does not exist, cannot delete", instrument_id);
         return;
